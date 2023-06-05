@@ -2,24 +2,34 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-function FetchedData({ encodeURL, selectedFile, isUserPresent }) {
+function FetchedData({ encodeURL, fileUploaded }) {
   const [files, setFiles] = useState([]);
+  const navigate = useNavigate();
 
-  console.log(isUserPresent);
   const fetchFiles = async () => {
     const { data } = await axios.get("/allpdfs");
     setFiles(data);
-    console.log(data);
   };
 
   useEffect(() => {
     fetchFiles();
-  }, [isUserPresent]);
+  }, [fileUploaded]);
 
-  useEffect(() => {}, [files]);
+  useEffect(() => {
+    fetchFiles();
+  }, [fileUploaded]);
+
   const handleClick = (id) => {
-    encodeURL(id);
-    // console.log(id);
+    navigate(`/pdf/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`/delete/${id}`);
+      console.log("PDF deleted successfully");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -34,9 +44,12 @@ function FetchedData({ encodeURL, selectedFile, isUserPresent }) {
                 href={k.path}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => handleClick(k.base64Data)}
+                onClick={() => handleClick(k._id)}
               >
                 Filepath
+              </a>{" "}
+              <a href="/" onClick={() => handleDelete(k._id)}>
+                Delete
               </a>
             </li>
           </ul>

@@ -1,22 +1,35 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-function FormSignIn({ isUser }) {
+function FormSignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [token, setToken] = useState("");
+  const navigate = useNavigate();
+
+  if (token) {
+    navigate("/");
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       // Send login request to the backend
       const response = await axios.post("/login", { email, password });
-      console.log(response.data);
+      const { token } = response.data;
+
+      // Store the token in local storage
+      localStorage.setItem("token", token);
+      setToken(localStorage.getItem("token", token));
+      // Set the token state
       // Clear the form
       setMessage("");
       setEmail("");
       setPassword("");
-      isUser();
+      navigate("/");
+      window.location.reload(false);
     } catch (error) {
       setMessage("Invalid Email or Password");
     }
@@ -24,25 +37,33 @@ function FormSignIn({ isUser }) {
 
   return (
     <div>
-      <h2>Login</h2>
-      {message && message}
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
+      {!token && (
+        <>
+          <h2>Login</h2>
+          {message && message}
+          <form onSubmit={handleLogin}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="on"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit">Login</button>
+          </form>
+          <div>
+            New User? <a href="/SignUp">Sign Up</a>
+          </div>
+        </>
+      )}
     </div>
   );
 }

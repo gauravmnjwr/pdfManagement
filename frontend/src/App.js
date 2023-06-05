@@ -1,82 +1,63 @@
-import axios from "axios";
-import { useState } from "react";
-
-/* eslint-disable */
-import FetchedData from "./components/FetchedData"; // eslint-disable-line
-import PdfViewer from "./components/PdfViewer";
+import { useEffect, useState } from "react";
 import FormSignUp from "./components/FormSignUp";
 import FormSignIn from "./components/FormSignIn";
 import UserHome from "./components/UserHome";
+import ViewPDF from "./components/ViewPDF";
+
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [file, setFile] = useState(null);
-  const [isUserPresent, setIsUserPresent] = useState(false);
+  const [token, setToken] = useState("");
+  // const [file, setFile] = useState(null);
 
-  const handelPDFChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    console.log(e.target.files[0]);
-  };
+  // const encodeURL = (url) => {
+  //   // console.log(url);
+  //   setFile(url);
+  // };
 
-  const onClickHandler = () => {
-    const data = new FormData();
-    data.append("file", selectedFile);
-    axios
-      .post("/api/uploadpdf", data, {
-        // receive two    parameter endpoint url ,form data
-      })
-      .then((res) => {
-        // then print response status
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+  }, []);
 
-        console.log(res.statusText);
-      });
-  };
-  const encodeURL = (url) => {
-    // console.log(url);
-    setFile(url);
-  };
-
-  const isUser = () => {
-    setIsUserPresent(false);
-    setIsUserPresent(true);
+  const tokenChange = (query) => {
+    if (query === "R") {
+      setToken("");
+      localStorage.removeItem("token");
+    } else {
+      setToken(localStorage.getItem("token"));
+    }
   };
 
   return (
     <div className="App">
-      <FormSignUp isUser={isUser} />
-      <FormSignIn isUser={isUser} />
-      <br />
-      <br />
-      <br />
-
-      {isUserPresent && (
-        <div>
-          <input
-            type="file"
-            name="file"
-            onChange={handelPDFChange}
-            accept=".pdf"
-            required
-          />
-          <button
-            type="button"
-            onClick={onClickHandler}
-            disabled={!selectedFile}
-          >
-            Upload
-          </button>
-          <FetchedData
-            encodeURL={encodeURL}
-            selectedFile={selectedFile}
-            isUserPresent={isUserPresent}
-          />
-          <PdfViewer pdfFile={"data:application/pdf;base64," + file} />
-        </div>
-      )}
       <Router>
         <Routes>
-          <Route path="/:id" element={<UserHome />} />
+          <Route
+            path="/"
+            element={<UserHome token={token} tokenChange={tokenChange} />}
+          />
+
+          <Route
+            path="/signUp"
+            element={
+              token ? (
+                <UserHome token={token} tokenChange={tokenChange} />
+              ) : (
+                <FormSignUp token={token} tokenChange={tokenChange} />
+              )
+            }
+          />
+          <Route
+            path="/signIn"
+            element={
+              token ? (
+                <UserHome token={token} tokenChange={tokenChange} />
+              ) : (
+                <FormSignIn token={token} tokenChange={tokenChange} />
+              )
+            }
+          />
+          <Route path="/pdf/:id" element={<ViewPDF />} />
         </Routes>
       </Router>
     </div>

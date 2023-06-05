@@ -5,14 +5,16 @@ import cors from "cors";
 import asyncHandler from "express-async-handler";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
-
 import path from "path";
-
 import mongoose from "mongoose";
+import http from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
+const secretKey = "abc123";
 
 var userId;
 
@@ -21,6 +23,27 @@ app.use(express.json());
 // app.use(bodyParser.json());
 
 app.use(cors());
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+  });
+
+  socket.on("send_message", (data) => {
+    io.in(data.room).emit("receive_message", data);
+  });
+});
 
 // Set up MongoDB connection
 mongoose.connect(process.env.MONGO_URL, {
@@ -122,6 +145,12 @@ const User = mongoose.model("User", userSchema);
 app.post(
   "/signup",
   asyncHandler(async (req, res) => {
+    if (userId) {
+      res.writeHead(302, {
+        Location: "http://localhost:3000",
+      });
+      res.end();
+    }
     console.log("signeddd");
     const { email, password } = req.body;
     const userExists = await User.findOne({ email });
@@ -137,7 +166,9 @@ app.post(
     userId = user._id.toString();
     if (user) {
       await user.save();
-      res.status(201).json({ message: "Signup successful" });
+      const token = jwt.sign({ user }, secretKey, { expiresIn: "1h" });
+
+      res.status(200).json({ token });
     } else {
       res.status(400);
       throw new Error("Invalid User Data");
@@ -149,6 +180,12 @@ app.post(
 app.post(
   "/login",
   asyncHandler(async (req, res) => {
+    if (userId) {
+      res.writeHead(302, {
+        Location: "http://localhost:3000",
+      });
+      res.end();
+    }
     try {
       const { email, password } = req.body;
       // Find the user in the database
@@ -164,7 +201,11 @@ app.post(
         res.status(401).json({ message: "Authentication failed" });
         return;
       }
-      res.status(200).json({ message: "Login successful" });
+      const token = jwt.sign({ user }, secretKey, { expiresIn: "1h" });
+
+      res.status(200).json({ token });
+
+      // res.status(200).json({ message: "Login successful" });
     } catch (error) {
       console.error("Login error", error);
       res.status(500).json({ message: "Login failed" });
@@ -179,28 +220,43 @@ app.post(
 // app.get('/getuser')
 
 app.get(
+  "/logout",
+  asyncHandler(async (req, res) => {
+    userId = undefined;
+  })
+);
+
+app.delete(
+  "/delete/:id",
+  asyncHandler(async (req, res) => {
+    const pdfId = req.params.id;
+
+    const file = await PDF.findByIdAndRemove(pdfId);
+
+    if (!file) {
+      console.error("Failed to delete PDF");
+      res.status(500).send("Failed to delete PDF");
+      return;
+    }
+    res.status(200).json({ message: "PDF deleted successfully" });
+  })
+);
+
+app.get(
   "/pdf/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
 
     // Find the PDF document by ID
     const file = await PDF.findById(pdfId);
-    console.log(file.contentType);
     if (file) {
-      res.setHeader("Content-Type", file.contentType);
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${file.filename}"`
-      );
-      // Stream the PDF data to the response
-      const stream = fs.createReadStream(file.data);
-      stream.pipe(res);
+      res.json(file);
+    } else {
+      res.status(500).json({ message: "Invalid PDF File" });
     }
-
-    // Set the response headers
   })
 );
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, console.log("Server is running on Port", PORT));
+server.listen(PORT, console.log("Server is running on Port", PORT));
