@@ -4,9 +4,6 @@
   "description": "PDF Management Collaboration is a web application design to facilitate the seamless management and collaboration of pdfs.",
   "main": "backend/server.js",
   "type": "module",
-  "engines": {
-    "node": "14.x"
-  },
   "scripts": {
     "start": "node backend/server",
     "server": "nodemon backend/server",
