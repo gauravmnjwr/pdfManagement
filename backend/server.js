@@ -14,7 +14,7 @@ import http from "http";
 import { Server } from "socket.io";
 
 dotenv.config();
-const secretKey = "abc123";
+const secretKey = process.env.SECRET_KEY;
 
 var userId;
 
@@ -30,7 +30,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://pdfmangement.netlify.app/",
     methods: ["GET", "POST"],
   },
 });
