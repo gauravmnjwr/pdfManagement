@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import helper from "./helper.js";
 
 function FormSignIn() {
   const [email, setEmail] = useState("");
@@ -10,14 +11,14 @@ function FormSignIn() {
   const navigate = useNavigate();
 
   if (token) {
-    navigate("/");
+    navigate(`${helper}`);
   }
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       // Send login request to the backend
-      const response = await axios.post("/login", { email, password });
+      const response = await axios.post(`${helper}/login`, { email, password });
       const { token } = response.data;
 
       // Store the token in local storage
@@ -28,7 +29,7 @@ function FormSignIn() {
       setMessage("");
       setEmail("");
       setPassword("");
-      navigate("/");
+      navigate(`${helper}`);
       window.location.reload(false);
     } catch (error) {
       setMessage("Invalid Email or Password");
@@ -36,30 +37,32 @@ function FormSignIn() {
   };
 
   return (
-    <div>
+    <div className="login">
       {!token && (
         <>
           <h2>Login</h2>
-          {message && message}
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="on"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit">Login</button>
-          </form>
-          <div>
+          <div className="sign-message">{message && message}</div>
+          <div className="login-form">
+            <form onSubmit={handleLogin}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="on"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button type="submit">Login</button>
+            </form>
+          </div>
+          <div className="is-new-user">
             New User? <a href="/SignUp">Sign Up</a>
           </div>
         </>

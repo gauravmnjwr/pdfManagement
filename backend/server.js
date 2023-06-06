@@ -21,6 +21,8 @@ var userId;
 const app = express();
 app.use(express.json());
 // app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(cors());
 
@@ -67,6 +69,7 @@ const pdfSchema = new mongoose.Schema(
     data: Buffer,
     base64Data: String,
     user: String,
+    comments: [String],
   },
   { timestamps: true }
 );
@@ -253,6 +256,49 @@ app.get(
       res.json(file);
     } else {
       res.status(500).json({ message: "Invalid PDF File" });
+    }
+  })
+);
+app.get(
+  "/pdf/shared/:id",
+  asyncHandler(async (req, res) => {
+    const pdfId = req.params.id;
+
+    // Find the PDF document by ID
+    const file = await PDF.findById(pdfId);
+    if (file) {
+      res.json(file);
+    } else {
+      res.status(500).json({ message: "Invalid PDF File" });
+    }
+  })
+);
+
+app.get(
+  "/pdf/allcomments/:id",
+  asyncHandler(async (req, res) => {
+    const pdfId = req.params.id;
+    const file = await PDF.findById(pdfId);
+    if (file) {
+      res.json(file);
+    } else {
+      res.status(500).json({ message: "Unable to Save" });
+    }
+  })
+);
+
+app.post(
+  "/pdf/comments/:id",
+  asyncHandler(async (req, res) => {
+    const pdfId = req.params.id;
+    const { message } = req.body;
+    const file = await PDF.findById(pdfId);
+    file.comments.push(message);
+    const saved = await file.save();
+    if (saved) {
+      res.json(file);
+    } else {
+      res.status(500).json({ message: "Unable to Save" });
     }
   })
 );

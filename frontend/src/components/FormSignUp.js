@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import helper from "./helper.js";
+
 import { useNavigate } from "react-router-dom";
 
 function FormSignUp({ token, tokenChange }) {
@@ -10,7 +12,7 @@ function FormSignUp({ token, tokenChange }) {
   const navigate = useNavigate();
 
   if (token) {
-    navigate("/");
+    navigate(`${helper}`);
   }
 
   const handleSignup = async (e) => {
@@ -23,7 +25,7 @@ function FormSignUp({ token, tokenChange }) {
     try {
       // Send signup request to the backend
       setMessage("");
-      const response = await axios.post("/signup", {
+      const response = await axios.post(`${helper}/signup`, {
         email,
         password,
       });
@@ -36,7 +38,7 @@ function FormSignUp({ token, tokenChange }) {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      navigate("/");
+      navigate(`${helper}`);
       window.location.reload(false);
     } catch (error) {
       setMessage("User Already Exists");
@@ -44,11 +46,11 @@ function FormSignUp({ token, tokenChange }) {
   };
 
   return (
-    <div>
+    <div className="signup">
       {!token && (
         <>
           <h2>Signup</h2>
-          {message && message}
+          <div className="sign-message">{message && message}</div>
           <form onSubmit={handleSignup}>
             <input
               type="email"
@@ -71,19 +73,14 @@ function FormSignUp({ token, tokenChange }) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <button
-              type="submit"
-              // onClick={() => {
-              //   navigate("/");
-              // }}
-            >
-              Signup
-            </button>
+            <button type="submit">Signup</button>
             <br />
-            Already a User? <a href="/SignIn">Sign In</a>
           </form>
         </>
       )}
+      <div className="already-user">
+        Already a User? <a href="/SignIn">Sign In</a>
+      </div>
     </div>
   );
 }

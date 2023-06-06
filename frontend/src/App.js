@@ -5,9 +5,11 @@ import UserHome from "./components/UserHome";
 import ViewPDF from "./components/ViewPDF";
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import SharePdf from "./components/SharePdf";
 
 function App() {
   const [token, setToken] = useState("");
+
   // const [file, setFile] = useState(null);
 
   // const encodeURL = (url) => {
@@ -30,7 +32,7 @@ function App() {
 
   return (
     <div className="App">
-      <Router>
+      <Router basename="/">
         <Routes>
           <Route
             path="/"
@@ -58,6 +60,7 @@ function App() {
             }
           />
           <Route path="/pdf/:id" element={<ViewPDF />} />
+          <Route path="/pdf/shared/:id" element={<SharePdf />} />
         </Routes>
       </Router>
     </div>

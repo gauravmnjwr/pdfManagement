@@ -12,10 +12,9 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 // Import styles of default layout plugin
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { useParams, useNavigate } from "react-router-dom";
+import helper from "./helper.js";
 
 import axios from "axios";
-import io from "socket.io-client";
-const socket = io.connect("http://localhost:5000");
 var flag = false;
 
 function ViewPDF() {
@@ -24,53 +23,44 @@ function ViewPDF() {
   const navigate = useNavigate();
 
   //Room State
-  const [room, setRoom] = useState(id);
 
   // Messages States
   const [message, setMessage] = useState("");
   const [allMessages, setAllMessages] = useState([]);
   const url = window.location.href;
+  const sharedURL = url.split("/").slice(0, -1).join("/");
 
   const token = localStorage.getItem("token");
   if (!token) {
-    navigate("/");
+    navigate(`${helper}`);
   }
-  const joinRoom = () => {
-    if (room !== "") {
-      socket.emit("join_room", room);
-    }
-  };
-
-  useEffect(() => {
-    joinRoom();
-  }, []);
 
   useEffect(() => {}, [allMessages]);
 
-  const sendMessage = () => {
-    socket.emit("send_message", { message, room });
-  };
+  useEffect(() => {
+    const getComments = async () => {
+      const { data } = await axios.get(`${helper}/pdf/allcomments/${id}`);
+      setAllMessages(data.comments);
+    };
+    getComments();
+  });
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   useEffect(() => {
     const getPdf = async () => {
-      const { data } = await axios.get(`/pdf/${id}`);
-      console.log();
+      const { data } = await axios.get(`${helper}/pdf/${id}`);
       setPdfFile("data:application/pdf;base64," + data.base64Data);
     };
     getPdf();
   }, [id]);
   useEffect(() => {}, [pdfFile]);
-  useEffect(() => {
-    socket.on("receive_message", (data) => {
-      if (flag) {
-        setAllMessages((prevState) => [...prevState, data.message]);
-      }
-      flag = !flag;
-    });
-  }, [socket]);
-  console.log(allMessages);
+  const sendMessage = async () => {
+    if (message) {
+      await axios.post(`${helper}/pdf/comments/${id}`, { message });
+      setMessage("");
+    }
+  };
 
   return (
     <div className="container">
@@ -78,6 +68,7 @@ function ViewPDF() {
         {pdfFile ? (
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.6.172/build/pdf.worker.min.js">
             <Viewer
+              theme="dark"
               fileUrl={pdfFile}
               plugins={[defaultLayoutPluginInstance]}
             ></Viewer>
@@ -94,42 +85,60 @@ function ViewPDF() {
         {!pdfFile && <>No file is selected yet</>}
       </div>
       <div className="rightaside">
-        <div>
-          <p>Share this PDF with your logged in Friends</p>
+        <div className="shared-div">
+          <p>=Collaborate with your logged-in friends by sharing this PDF. </p>
           <CopyToClipboard text={url}>
-            <button>Copy URL to the clipboard</button>
+            <button>
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/1827/1827973.png"
+                alt="SHARE"
+              />
+            </button>
+          </CopyToClipboard>
+        </div>
+        <div className="shared-div">
+          <p>Share Only</p>
+          <CopyToClipboard text={`${sharedURL}/shared/${id}`}>
+            <button>
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/1827/1827973.png"
+                alt="SHARE"
+              />
+            </button>
           </CopyToClipboard>
         </div>
         <div className="message-box">
-          <h1> Message:</h1>
-          {/* {messageReceived} */}
-          {allMessages &&
-            allMessages.map((m, i) => {
-              return (
-                <div className="message-tiles" key={i}>
-                  {m}
-                </div>
-              );
-            })}
+          <div className="message-heading">
+            <h5>Chat</h5>
+          </div>
+          <div className="messages">
+            <div>
+              {allMessages &&
+                allMessages.map((m, i) => {
+                  return (
+                    <div className="message-tiles" key={i}>
+                      <div>{m}</div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
         </div>
         <div className="message-inp-box">
           <input
-            placeholder="Message..."
+            placeholder="Add Comment..."
             onChange={(event) => {
               setMessage(event.target.value);
             }}
+            value={message}
           />
-          <button onClick={sendMessage}> Send Message</button>
-        </div>
-        <div className="room-box">
-          <input
-            placeholder="Room Number..."
-            value={room}
-            onChange={(event) => {
-              setRoom(event.target.value);
-            }}
-          />
-          <button onClick={joinRoom}> Join Room</button>
+          <button onClick={sendMessage}>
+            {" "}
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/736/736212.png"
+              alt="Send"
+            />
+          </button>
         </div>
       </div>
     </div>
