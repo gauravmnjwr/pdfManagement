@@ -15,7 +15,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import helper from "./helper/helper";
 
 import axios from "axios";
-var flag = false;
 
 function ViewPDF() {
   const [pdfFile, setPdfFile] = useState("");
