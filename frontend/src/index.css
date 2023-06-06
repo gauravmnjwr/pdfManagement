@@ -495,3 +495,7 @@ input[type="file"] {
     width: fit-content;
   }
 }
+
+button {
+  cursor: pointer;
+}

@@ -31,7 +31,7 @@ function ViewPDF() {
 
   const token = localStorage.getItem("token");
   if (!token) {
-    navigate(`${helper}`);
+    navigate("/");
   }
 
   useEffect(() => {}, [allMessages]);

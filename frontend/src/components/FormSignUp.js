@@ -12,7 +12,7 @@ function FormSignUp({ token, tokenChange }) {
   const navigate = useNavigate();
 
   if (token) {
-    navigate(`${helper}`);
+    navigate("/");
   }
 
   const handleSignup = async (e) => {
@@ -38,7 +38,7 @@ function FormSignUp({ token, tokenChange }) {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      navigate(`${helper}`);
+      navigate("/");
       window.location.reload(false);
     } catch (error) {
       setMessage("User Already Exists");

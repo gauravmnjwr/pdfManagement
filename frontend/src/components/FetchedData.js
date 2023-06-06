@@ -24,7 +24,7 @@ function FetchedData({ encodeURL, fileUploaded }) {
   }, [fileUploaded]);
 
   const handleClick = (id) => {
-    navigate(`${helper}/pdf/${id}`);
+    navigate(`/pdf/${id}`);
   };
 
   const handleDelete = async (id) => {

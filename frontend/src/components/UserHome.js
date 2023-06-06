@@ -55,7 +55,7 @@ function UserHome({ token, tokenChange }) {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate(`${helper}`);
+    navigate("/");
     axios.get(`${helper}/logout`);
   };
 

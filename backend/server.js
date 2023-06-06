@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import multer from "multer";
 import cors from "cors";
 import asyncHandler from "express-async-handler";
 import { fileURLToPath } from "url";
@@ -30,7 +29,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://pdfmangement.netlify.app/",
+    origin: "https://pdfmanagement-fxjw.onrender.com",
     methods: ["GET", "POST"],
   },
 });
@@ -77,16 +76,6 @@ const pdfSchema = new mongoose.Schema(
 const PDF = mongoose.model("PDF", pdfSchema);
 
 //
-const storage = multer.diskStorage({
-  destination: "./uploads",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-var upload = multer({ storage: storage }).single("file");
-
-//
 app.get("/", (req, res) => {
   res.json({ message: "Hye" });
 });
@@ -101,11 +90,6 @@ app.post(
   asyncHandler(async (req, res) => {
     upload(req, res, function (err) {
       const filepath = path.join(__dirname, "../") + req.file.path;
-      if (err instanceof multer.MulterError) {
-        return res.status(500).json(err);
-      } else if (err) {
-        return res.status(500).json(err);
-      }
 
       fs.readFile(filepath, { encoding: "base64" }, (err, data) => {
         if (err) {

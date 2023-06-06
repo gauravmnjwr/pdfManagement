@@ -11,7 +11,7 @@ function FormSignIn() {
   const navigate = useNavigate();
 
   if (token) {
-    navigate(`${helper}`);
+    navigate("/");
   }
 
   const handleLogin = async (e) => {
@@ -29,7 +29,7 @@ function FormSignIn() {
       setMessage("");
       setEmail("");
       setPassword("");
-      navigate(`${helper}`);
+      navigate("/");
       window.location.reload(false);
     } catch (error) {
       setMessage("Invalid Email or Password");
