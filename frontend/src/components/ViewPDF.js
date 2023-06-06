@@ -12,7 +12,7 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 // Import styles of default layout plugin
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { useParams, useNavigate } from "react-router-dom";
-import helper from "./helper.js";
+import helper from "./helper/helper";
 
 import axios from "axios";
 var flag = false;

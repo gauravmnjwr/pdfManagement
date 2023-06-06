@@ -6,7 +6,7 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import axios from "axios";
-import helper from "./helper.js";
+import helper from "./helper/helper";
 
 function SharePdf() {
   const { id } = useParams();
