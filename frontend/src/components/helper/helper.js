@@ -1,2 +1,2 @@
-const BASE_URL = "https://pdf-management-mern.vercel.app/";
+const BASE_URL = "https://pdfmanagement-fxjw.onrender.com/";
 export default BASE_URL;
