@@ -249,9 +249,11 @@ input:focus {
   align-items: center;
   justify-content: center;
   width: 80px;
-  text-overflow: ellipsis;
   margin: 0px auto;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .logout {

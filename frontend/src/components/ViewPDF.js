@@ -85,7 +85,7 @@ function ViewPDF() {
       </div>
       <div className="rightaside">
         <div className="shared-div">
-          <p>=Collaborate with your logged-in friends by sharing this PDF. </p>
+          <p>Collaborate with your logged-in friends by sharing this PDF. </p>
           <CopyToClipboard text={url}>
             <button>
               <img

@@ -9,9 +9,13 @@ function FetchedData({ encodeURL, fileUploaded }) {
   const [searchFiles, setSearchFiles] = useState([]);
 
   const navigate = useNavigate();
+  const userDetails = JSON.parse(localStorage.getItem("userDetails"));
+  console.log(userDetails);
 
   const fetchFiles = async () => {
-    const { data } = await axios.get(`${helper}/allpdfs`);
+    const { data } = await axios.get(`${helper}/allpdfs`, {
+      params: userDetails,
+    });
     setFiles(data);
   };
 
@@ -19,11 +23,8 @@ function FetchedData({ encodeURL, fileUploaded }) {
     fetchFiles();
   });
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fileUploaded]);
-
   const handleClick = (id) => {
+    console.log(navigate);
     navigate(`/pdf/${id}`);
   };
 
@@ -78,19 +79,20 @@ function FetchedData({ encodeURL, fileUploaded }) {
                     <div className="pdf-name">{k.name}</div>
                     <div className="pdf-links">
                       <div>
-                        <a
-                          href={k.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <div
+                          style={{ cursor: "pointer", color: "#3d5af1" }}
                           onClick={() => handleClick(k._id)}
                         >
                           Open
-                        </a>{" "}
+                        </div>{" "}
                       </div>
                       <div>
-                        <a href="/" onClick={() => handleDelete(k._id)}>
+                        <div
+                          style={{ cursor: "pointer", color: "#3d5af1" }}
+                          onClick={() => handleDelete(k._id)}
+                        >
                           Delete
-                        </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -114,19 +116,20 @@ function FetchedData({ encodeURL, fileUploaded }) {
                     <div className="pdf-name">{k.name}</div>
                     <div className="pdf-links">
                       <div>
-                        <a
-                          href={k.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <div
+                          style={{ cursor: "pointer", color: "#3d5af1" }}
                           onClick={() => handleClick(k._id)}
                         >
                           Open
-                        </a>{" "}
+                        </div>{" "}
                       </div>
                       <div>
-                        <a href="/" onClick={() => handleDelete(k._id)}>
+                        <div
+                          style={{ cursor: "pointer", color: "#3d5af1" }}
+                          onClick={() => handleDelete(k._id)}
+                        >
                           Delete
-                        </a>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URL, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-      //   useCreateIndex: true,
-    });
-    console.log(`Mongodb Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
-  }
+  mongoose.connect(process.env.MONGO_URL, {
+    // dbName: "pdfManagement",
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  const db = mongoose.connection;
+  db.on("error", console.error.bind(console, "MongoDB connection error:"));
+  db.once("open", () => {
+    console.log("Connected to MongoDB");
+  });
 };
 
 export default connectDB;

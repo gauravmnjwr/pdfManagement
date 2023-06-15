@@ -8,14 +8,13 @@ import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import path from "path";
-import mongoose from "mongoose";
-import http from "http";
-import { Server } from "socket.io";
+import { config } from "./config/config.js";
+import multer from "multer";
+import connectDB from "./config/db.js";
+import PDF from "./models/pdfModel.js";
+import User from "./models/userModel.js";
 
 dotenv.config();
-const secretKey = process.env.SECRET_KEY;
-
-var userId;
 
 const app = express();
 app.use(express.json());
@@ -25,55 +24,17 @@ app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(cors());
 
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "https://pdfmanagement-fxjw.onrender.com",
-    methods: ["GET", "POST"],
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
-
-  socket.on("join_room", (data) => {
-    socket.join(data);
-  });
-
-  socket.on("send_message", (data) => {
-    io.in(data.room).emit("receive_message", data);
-  });
-});
-
 // Set up MongoDB connection
-mongoose.connect(process.env.MONGO_URL, {
-  // dbName: "pdfManagement",
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => {
-  console.log("Connected to MongoDB");
-});
+connectDB();
 
-//schema
-
-const pdfSchema = new mongoose.Schema(
-  {
-    name: String,
-    path: String,
-    contentType: String,
-    data: Buffer,
-    base64Data: String,
-    user: String,
-    comments: [String],
+const storage = multer.diskStorage({
+  destination: "./uploads",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
   },
-  { timestamps: true }
-);
+});
 
-const PDF = mongoose.model("PDF", pdfSchema);
+var upload = multer({ storage: storage }).single("file");
 
 //
 app.get("/", (req, res) => {
@@ -83,11 +44,10 @@ app.get("/", (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log(path.join(__dirname, "../"));
-
 app.post(
   "/api/uploadpdf",
   asyncHandler(async (req, res) => {
+    const uploadUser = req.query.id;
     upload(req, res, function (err) {
       const filepath = path.join(__dirname, "../") + req.file.path;
 
@@ -96,12 +56,13 @@ app.post(
           console.error("Failed to read PDF file", err);
           return;
         }
+
         PDF.create({
           name: req.file.originalname,
           path: filepath,
           contentType: req.file.mimetype,
           base64Data: data,
-          user: userId,
+          user: uploadUser,
         });
       });
 
@@ -115,29 +76,18 @@ app.post(
 app.get(
   "/allpdfs",
   asyncHandler(async (req, res) => {
-    const fetchedPdfs = await PDF.find({ user: userId });
+    const data = req.query;
+    const fetchedPdfs = await PDF.find({ user: data.id });
     res.json(fetchedPdfs);
   })
 );
 
 //signup-signin form
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-const User = mongoose.model("User", userSchema);
 
 // Signup route
 app.post(
   "/signup",
   asyncHandler(async (req, res) => {
-    if (userId) {
-      res.writeHead(302, {
-        Location: "http://localhost:3000",
-      });
-      res.end();
-    }
     console.log("signeddd");
     const { email, password } = req.body;
     const userExists = await User.findOne({ email });
@@ -150,12 +100,14 @@ app.post(
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ email, password: hashedPassword });
     // save user id
-    userId = user._id.toString();
     if (user) {
       await user.save();
-      const token = jwt.sign({ user }, secretKey, { expiresIn: "1h" });
-
-      res.status(200).json({ token });
+      const token = jwt.sign({ id: user._id }, config.jwtSecret, {
+        expiresIn: config.jwtExpiration,
+      });
+      res
+        .status(200)
+        .json({ token, userDetails: { id: user._id, email: user.email } });
     } else {
       res.status(400);
       throw new Error("Invalid User Data");
@@ -167,17 +119,9 @@ app.post(
 app.post(
   "/login",
   asyncHandler(async (req, res) => {
-    if (userId) {
-      res.writeHead(302, {
-        Location: "http://localhost:3000",
-      });
-      res.end();
-    }
     try {
       const { email, password } = req.body;
-      // Find the user in the database
       const user = await User.findOne({ email });
-      userId = user._id.toString();
       if (!user) {
         res.status(404);
         throw new Error("User Not Found");
@@ -188,10 +132,13 @@ app.post(
         res.status(401).json({ message: "Authentication failed" });
         return;
       }
-      const token = jwt.sign({ user }, secretKey, { expiresIn: "1h" });
+      const token = jwt.sign({ id: user._id }, config.jwtSecret, {
+        expiresIn: config.jwtExpiration,
+      });
 
-      res.status(200).json({ token });
-
+      res
+        .status(200)
+        .json({ token, userDetails: { id: user._id, email: user.email } });
       // res.status(200).json({ message: "Login successful" });
     } catch (error) {
       console.error("Login error", error);
@@ -200,24 +147,15 @@ app.post(
   })
 );
 
-// app.get("/allusers",asyncHandler(async(req,res) =>{
-
-// }))
-
-// app.get('/getuser')
-
 app.get(
   "/logout",
-  asyncHandler(async (req, res) => {
-    userId = undefined;
-  })
+  asyncHandler(async (req, res) => {})
 );
 
 app.delete(
   "/delete/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
-
     const file = await PDF.findByIdAndRemove(pdfId);
 
     if (!file) {
@@ -247,7 +185,6 @@ app.get(
   "/pdf/shared/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
-
     // Find the PDF document by ID
     const file = await PDF.findById(pdfId);
     if (file) {
@@ -289,4 +226,4 @@ app.post(
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, console.log("Server is running on Port", PORT));
+app.listen(PORT, console.log("Server is running on Port", PORT));

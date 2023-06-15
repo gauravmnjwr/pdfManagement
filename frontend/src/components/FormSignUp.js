@@ -29,10 +29,11 @@ function FormSignUp({ token, tokenChange }) {
         email,
         password,
       });
-      const { token } = response.data;
-      console.log(token);
+      const { token, userDetails } = response.data;
+      console.log(userDetails);
       // Store the token in local storage
       localStorage.setItem("token", token);
+      localStorage.setItem("userDetails", JSON.stringify(userDetails));
       // Set the token state
       // Clear the form
       setEmail("");

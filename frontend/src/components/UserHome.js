@@ -39,9 +39,15 @@ function UserHome({ token, tokenChange }) {
   const onClickHandler = () => {
     const data = new FormData();
     data.append("file", selectedFile);
+    const userDetails = JSON.parse(localStorage.getItem("userDetails"));
+    // data.append(userDetails.id);
+
     axios
       .post(`${helper}/api/uploadpdf`, data, {
-        // receive two    parameter endpoint url ,form data
+        params: userDetails,
+        headers: {
+          "Content-Type": "multipart/form-data", // Set the appropriate content type for file upload
+        },
       })
       .then((res) => {
         // then print response status
@@ -101,8 +107,8 @@ function UserHome({ token, tokenChange }) {
       ) : (
         <>
           <div className="user-sign-page">
-            <a href={`${helper}/signUp`}>SignUp</a>
-            <a href={`${helper}/signIn`}>Log In</a>
+            <a href={`/signUp`}>SignUp</a>
+            <a href={`/signIn`}>Log In</a>
           </div>
         </>
       )}

@@ -10,13 +10,6 @@ import SharePdf from "./components/SharePdf";
 function App() {
   const [token, setToken] = useState("");
 
-  // const [file, setFile] = useState(null);
-
-  // const encodeURL = (url) => {
-  //   // console.log(url);
-  //   setFile(url);
-  // };
-
   useEffect(() => {
     setToken(localStorage.getItem("token"));
   }, []);

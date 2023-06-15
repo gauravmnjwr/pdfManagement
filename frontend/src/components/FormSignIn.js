@@ -19,11 +19,14 @@ function FormSignIn() {
     try {
       // Send login request to the backend
       const response = await axios.post(`${helper}/login`, { email, password });
-      const { token } = response.data;
+      const { token, userDetails } = response.data;
 
       // Store the token in local storage
       localStorage.setItem("token", token);
+      localStorage.setItem("userDetails", JSON.stringify(userDetails));
+
       setToken(localStorage.getItem("token", token));
+
       // Set the token state
       // Clear the form
       setMessage("");
