@@ -10,7 +10,6 @@ function FetchedData({ encodeURL, fileUploaded }) {
 
   const navigate = useNavigate();
   const userDetails = JSON.parse(localStorage.getItem("userDetails"));
-  console.log(userDetails);
 
   const fetchFiles = async () => {
     const { data } = await axios.get(`${helper}/allpdfs`, {
@@ -24,14 +23,12 @@ function FetchedData({ encodeURL, fileUploaded }) {
   });
 
   const handleClick = (id) => {
-    console.log(navigate);
     navigate(`/pdf/${id}`);
   };
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${helper}/delete/${id}`);
-      console.log("PDF deleted successfully");
     } catch (error) {
       console.error(error);
     }
@@ -102,40 +99,41 @@ function FetchedData({ encodeURL, fileUploaded }) {
           </>
         ) : (
           <>
-            {files.map((k, i) => {
-              return (
-                <div key={i} className="pdf-main">
-                  <div className="pdf-image">
-                    {" "}
-                    <img
-                      src="https://cdn-icons-png.flaticon.com/512/136/136522.png"
-                      alt="PDF"
-                    />
-                  </div>
-                  <div className="pdf-info">
-                    <div className="pdf-name">{k.name}</div>
-                    <div className="pdf-links">
-                      <div>
-                        <div
-                          style={{ cursor: "pointer", color: "#3d5af1" }}
-                          onClick={() => handleClick(k._id)}
-                        >
-                          Open
-                        </div>{" "}
-                      </div>
-                      <div>
-                        <div
-                          style={{ cursor: "pointer", color: "#3d5af1" }}
-                          onClick={() => handleDelete(k._id)}
-                        >
-                          Delete
+            {files &&
+              files.map((k, i) => {
+                return (
+                  <div key={i} className="pdf-main">
+                    <div className="pdf-image">
+                      {" "}
+                      <img
+                        src="https://cdn-icons-png.flaticon.com/512/136/136522.png"
+                        alt="PDF"
+                      />
+                    </div>
+                    <div className="pdf-info">
+                      <div className="pdf-name">{k.name}</div>
+                      <div className="pdf-links">
+                        <div>
+                          <div
+                            style={{ cursor: "pointer", color: "#3d5af1" }}
+                            onClick={() => handleClick(k.id)}
+                          >
+                            Open
+                          </div>{" "}
+                        </div>
+                        <div>
+                          <div
+                            style={{ cursor: "pointer", color: "#3d5af1" }}
+                            onClick={() => handleDelete(k.id)}
+                          >
+                            Delete
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </>
         )}
       </div>

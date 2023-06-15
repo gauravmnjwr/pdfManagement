@@ -30,7 +30,6 @@ function FormSignUp({ token, tokenChange }) {
         password,
       });
       const { token, userDetails } = response.data;
-      console.log(userDetails);
       // Store the token in local storage
       localStorage.setItem("token", token);
       localStorage.setItem("userDetails", JSON.stringify(userDetails));

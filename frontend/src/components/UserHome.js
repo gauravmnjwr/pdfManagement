@@ -14,16 +14,13 @@ function UserHome({ token, tokenChange }) {
   const navigate = useNavigate();
   const formRef = useRef();
 
-  // console.log(navigate(-2));
   function getExtension(filename) {
     return filename.split(".").pop();
   }
 
   const handelPDFChange = (e) => {
     const size = Number(e.target.files[0].size / 1000000);
-    console.log(size);
     const ext = getExtension(e.target.files[0].name);
-    console.log(ext.toLowerCase());
     if (size > 12.5) {
       setMessage("Please choose a PDF under 12 MB.");
       formRef.current.value = null;
@@ -51,8 +48,6 @@ function UserHome({ token, tokenChange }) {
       })
       .then((res) => {
         // then print response status
-
-        console.log(res.statusText);
       });
     setFileUploaded(selectedFile.name);
     setSelectedFile(null);

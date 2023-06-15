@@ -21,11 +21,10 @@ function ViewPDF() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  //Room State
-
   // Messages States
   const [message, setMessage] = useState("");
   const [allMessages, setAllMessages] = useState([]);
+  const [reply, setReply] = useState(false);
   const url = window.location.href;
   const sharedURL = url.split("/").slice(0, -1).join("/");
 
@@ -39,10 +38,16 @@ function ViewPDF() {
   useEffect(() => {
     const getComments = async () => {
       const { data } = await axios.get(`${helper}/pdf/allcomments/${id}`);
-      setAllMessages(data.comments);
+      if (data) {
+        setAllMessages(data.comments);
+      }
     };
     getComments();
   });
+
+  const handleReplyInput = () => {
+    setReply(true);
+  };
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
@@ -80,7 +85,6 @@ function ViewPDF() {
           </>
         )}
 
-        {/* render this if we have pdfFile state null   */}
         {!pdfFile && <>No file is selected yet</>}
       </div>
       <div className="rightaside">
@@ -123,6 +127,7 @@ function ViewPDF() {
             </div>
           </div>
         </div>
+
         <div className="message-inp-box">
           <input
             placeholder="Add Comment..."
@@ -131,6 +136,7 @@ function ViewPDF() {
             }}
             value={message}
           />
+
           <button onClick={sendMessage}>
             {" "}
             <img

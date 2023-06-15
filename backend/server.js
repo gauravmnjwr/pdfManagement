@@ -13,6 +13,7 @@ import multer from "multer";
 import connectDB from "./config/db.js";
 import PDF from "./models/pdfModel.js";
 import User from "./models/userModel.js";
+import Comment from "./models/commentModel.js";
 
 dotenv.config();
 
@@ -78,7 +79,12 @@ app.get(
   asyncHandler(async (req, res) => {
     const data = req.query;
     const fetchedPdfs = await PDF.find({ user: data.id });
-    res.json(fetchedPdfs);
+    // const { name } = fetchedPdfs;
+    // console.log(fetchedPdfs);
+    const names = fetchedPdfs.map((k, i) => {
+      return { name: k.name, id: k._id };
+    });
+    res.json(names);
   })
 );
 
@@ -199,7 +205,11 @@ app.get(
   "/pdf/allcomments/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
-    const file = await PDF.findById(pdfId);
+    const file = await Comment.findOne({ pdfId });
+    if (!file) {
+      const comment = new Comment({ pdfId, comments: [], replies: [] });
+      await comment.save();
+    }
     if (file) {
       res.json(file);
     } else {
@@ -208,12 +218,21 @@ app.get(
   })
 );
 
+app.get(
+  "/pdf/comments/reply",
+  asyncHandler(async (req, res) => {})
+);
+
 app.post(
   "/pdf/comments/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
     const { message } = req.body;
-    const file = await PDF.findById(pdfId);
+    const file = await Comment.findOne({ pdfId });
+    if (!file) {
+      const comment = new Comment({ pdfId, comments: [], replies: [] });
+      await comment.save();
+    }
     file.comments.push(message);
     const saved = await file.save();
     if (saved) {
