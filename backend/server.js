@@ -79,12 +79,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const data = req.query;
     const fetchedPdfs = await PDF.find({ user: data.id });
-    // const { name } = fetchedPdfs;
-    // console.log(fetchedPdfs);
-    const names = fetchedPdfs.map((k, i) => {
-      return { name: k.name, id: k._id };
-    });
-    res.json(names);
+    res.json(fetchedPdfs);
   })
 );
 
@@ -216,11 +211,6 @@ app.get(
       res.status(500).json({ message: "Unable to Save" });
     }
   })
-);
-
-app.get(
-  "/pdf/comments/reply",
-  asyncHandler(async (req, res) => {})
 );
 
 app.post(
