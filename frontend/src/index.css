@@ -138,11 +138,6 @@ code {
   font-family: sans-serif;
 }
 
-.message-box {
-  /* overflow: scroll; */
-  /* overflow-x: hidden; */
-}
-
 .message-inp-box,
 .room-box {
   display: flex;
@@ -195,9 +190,6 @@ input:focus {
   align-items: center;
   justify-content: center;
   background-color: #df4749;
-}
-
-.message-heading h5 {
 }
 
 .room-edit {
