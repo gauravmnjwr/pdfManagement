@@ -24,7 +24,6 @@ function ViewPDF() {
   // Messages States
   const [message, setMessage] = useState("");
   const [allMessages, setAllMessages] = useState([]);
-  const [reply, setReply] = useState(false);
   const url = window.location.href;
   const sharedURL = url.split("/").slice(0, -1).join("/");
 
@@ -44,10 +43,6 @@ function ViewPDF() {
     };
     getComments();
   });
-
-  const handleReplyInput = () => {
-    setReply(true);
-  };
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 

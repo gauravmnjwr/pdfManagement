@@ -42,9 +42,6 @@ function UserHome({ token, tokenChange }) {
     axios
       .post(`${helper}/api/uploadpdf`, data, {
         params: userDetails,
-        headers: {
-          "Content-Type": "multipart/form-data", // Set the appropriate content type for file upload
-        },
       })
       .then((res) => {
         // then print response status
