@@ -2,14 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import asyncHandler from "express-async-handler";
-import { fileURLToPath } from "url";
-import fs from "fs";
 import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
-import path from "path";
 import { config } from "./config/config.js";
-import multer from "multer";
 import connectDB from "./config/db.js";
 import PDF from "./models/pdfModel.js";
 import User from "./models/userModel.js";
@@ -18,59 +14,43 @@ import Comment from "./models/commentModel.js";
 dotenv.config();
 
 const app = express();
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+// app.use(express.json());
 app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 500000,
+  })
+);
+// app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(cors());
 
 // Set up MongoDB connection
 connectDB(process.env.MONGO_URI);
 
-const storage = multer.diskStorage({
-  destination: "./uploads",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-var upload = multer({ storage: storage }).single("file");
-
 //
 app.get("/", (req, res) => {
   res.json({ message: "Hye" });
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.post(
   "/api/uploadpdf",
   asyncHandler(async (req, res) => {
     const uploadUser = req.query.id;
-    upload(req, res, function (err) {
-      const filepath = path.join(__dirname, "../") + req.file.path;
-
-      fs.readFile(filepath, { encoding: "base64" }, (err, data) => {
-        if (err) {
-          console.error("Failed to read PDF file", err);
-          return;
-        }
-
-        PDF.create({
-          name: req.file.originalname,
-          path: filepath,
-          contentType: req.file.mimetype,
-          base64Data: data,
-          user: uploadUser,
-        });
+    const { base64String, currFile } = req.body;
+    try {
+      const pdf = PDF.create({
+        name: currFile,
+        contentType: "application/pdf",
+        base64Data: base64String,
+        user: uploadUser,
       });
-
-      return res.status(200).send(req.file);
-    });
-
-    console.log("post req");
+      return res.status(200).json({ message: "PDF Saved Successfully" });
+    } catch (error) {
+      return res.status(500).json({ error: error });
+    }
   })
 );
 
@@ -201,15 +181,17 @@ app.get(
   "/pdf/allcomments/:id",
   asyncHandler(async (req, res) => {
     const pdfId = req.params.id;
-    const file = await Comment.findOne({ pdfId });
-    if (!file) {
-      const comment = new Comment({ pdfId, comments: [], replies: [] });
-      await comment.save();
-    }
-    if (file) {
-      res.json(file);
-    } else {
-      res.status(500).json({ message: "Unable to Save" });
+    try {
+      const file = await Comment.findOne({ pdfId });
+      if (!file) {
+        const comment = new Comment({ pdfId, comments: [], replies: [] });
+        await comment.save();
+        return res.status(200).json({});
+      } else {
+        return res.json(file);
+      }
+    } catch (error) {
+      return res.status(500).json({ message: error });
     }
   })
 );

@@ -49,8 +49,7 @@ function FormSignUp({ token, tokenChange }) {
     <div className="signup">
       {!token && (
         <>
-          <h2>Signup</h2>
-          <div className="sign-message">{message && message}</div>
+          <h2>Sign up to PDF Management</h2>
           <form onSubmit={handleSignup}>
             <input
               type="email"
@@ -73,6 +72,7 @@ function FormSignUp({ token, tokenChange }) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+            <div className="sign-message">{message && message}</div>
             <button type="submit">Signup</button>
             <br />
           </form>

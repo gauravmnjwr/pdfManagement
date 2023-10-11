@@ -43,8 +43,7 @@ function FormSignIn() {
     <div className="login">
       {!token && (
         <>
-          <h2>Login</h2>
-          <div className="sign-message">{message && message}</div>
+          <h2>Login to PDF Management</h2>
           <div className="login-form">
             <form onSubmit={handleLogin}>
               <input
@@ -62,6 +61,7 @@ function FormSignIn() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <div className="sign-message">{message && message}</div>
               <button type="submit">Login</button>
             </form>
           </div>

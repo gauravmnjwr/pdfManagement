@@ -32,17 +32,19 @@ function ViewPDF() {
     navigate("/");
   }
 
-  useEffect(() => {}, [allMessages]);
+  const getComments = async () => {
+    const { data } = await axios.get(`${helper}/pdf/allcomments/${id}`);
+    if (data) {
+      setAllMessages(data.comments);
+    }
+  };
 
   useEffect(() => {
-    const getComments = async () => {
-      const { data } = await axios.get(`${helper}/pdf/allcomments/${id}`);
-      if (data) {
-        setAllMessages(data.comments);
-      }
-    };
-    getComments();
-  });
+    const interval = setInterval(() => {
+      getComments();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [message]);
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 

@@ -2,36 +2,58 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import helper from "./helper/helper";
+import Swal from "sweetalert2";
 
 function FetchedData({ encodeURL, fileUploaded }) {
   const [files, setFiles] = useState([]);
   const [query, setQuery] = useState("");
   const [searchFiles, setSearchFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const userDetails = JSON.parse(localStorage.getItem("userDetails"));
 
   const fetchFiles = async () => {
-    const { data } = await axios.get(`${helper}/allpdfs`, {
-      params: userDetails,
-    });
-    setFiles(data);
+    await axios
+      .get(`${helper}/allpdfs`, {
+        params: userDetails,
+      })
+      .then((res) => {
+        setFiles(res.data);
+        setLoading(false);
+      })
+      .catch((err) => console.log(err));
   };
 
   useEffect(() => {
-    fetchFiles();
-  });
+    setLoading(true);
+    const interval = setInterval(() => {
+      fetchFiles();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleClick = (id) => {
+    console.log(id);
     navigate(`/pdf/${id}`);
   };
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${helper}/delete/${id}`);
-    } catch (error) {
-      console.error(error);
-    }
+    Swal.fire({
+      title: "Are you sure you want to delete?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await axios.delete(`${helper}/delete/${id}`);
+        // Swal.fire("Deleted!", "Your file has been deleted.", "success");
+        window.location.reload();
+      }
+    });
   };
 
   const handleSearchQuery = () => {
@@ -116,7 +138,7 @@ function FetchedData({ encodeURL, fileUploaded }) {
                         <div>
                           <div
                             style={{ cursor: "pointer", color: "#3d5af1" }}
-                            onClick={() => handleClick(k.id)}
+                            onClick={() => handleClick(k._id)}
                           >
                             Open
                           </div>{" "}
@@ -124,7 +146,7 @@ function FetchedData({ encodeURL, fileUploaded }) {
                         <div>
                           <div
                             style={{ cursor: "pointer", color: "#3d5af1" }}
-                            onClick={() => handleDelete(k.id)}
+                            onClick={() => handleDelete(k._id)}
                           >
                             Delete
                           </div>
@@ -135,6 +157,9 @@ function FetchedData({ encodeURL, fileUploaded }) {
                 );
               })}
           </>
+        )}
+        {loading && (
+          <div className="loading" data-loading-text="Loading..."></div>
         )}
       </div>
     </div>

@@ -3,6 +3,8 @@ import axios from "axios";
 import FetchedData from "./FetchedData";
 import { useNavigate } from "react-router-dom";
 import helper from "./helper/helper";
+import Swal from "sweetalert2";
+import HomepageComponent from "./HomepageComponent";
 
 function UserHome({ token, tokenChange }) {
   //   const [token, setToken] = useState("");
@@ -11,6 +13,7 @@ function UserHome({ token, tokenChange }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileUploaded, setFileUploaded] = useState("");
   const [message, setMessage] = useState("");
+  const [currFile, setCurrFile] = useState("");
   const navigate = useNavigate();
   const formRef = useRef();
 
@@ -30,25 +33,34 @@ function UserHome({ token, tokenChange }) {
     } else {
       setMessage("");
       setSelectedFile(e.target.files[0]);
+      setCurrFile(e.target.files[0].name);
     }
   };
 
   const onClickHandler = () => {
-    const data = new FormData();
-    data.append("file", selectedFile);
     const userDetails = JSON.parse(localStorage.getItem("userDetails"));
     // data.append(userDetails.id);
-
-    axios
-      .post(`${helper}/api/uploadpdf`, data, {
-        params: userDetails,
-      })
-      .then((res) => {
-        // then print response status
-      });
-    setFileUploaded(selectedFile.name);
-    setSelectedFile(null);
-    formRef.current.value = null;
+    const file = selectedFile;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64String = e.target.result.split(",")[1];
+      await axios
+        .post(
+          `${helper}/api/uploadpdf`,
+          { base64String, currFile },
+          {
+            params: userDetails,
+          }
+        )
+        .then((res) => {
+          // then print response status
+          setFileUploaded(selectedFile.name);
+          setSelectedFile(null);
+          formRef.current.value = null;
+          Swal.fire("Success!", "PDF Uploaded Successfully", "success");
+        });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleLogout = () => {
@@ -67,13 +79,15 @@ function UserHome({ token, tokenChange }) {
                 Log Out
               </a>
             </div>
+            <h2>Upload your PDF and start collaborating</h2>
+
             <div className="pdf-uploading">
               <label htmlFor="file-upload" className="custom-file-upload">
                 <img
                   src="https://cdn-icons-png.flaticon.com/512/568/568717.png"
                   alt=""
                 />{" "}
-                {selectedFile ? <>{selectedFile.name}</> : <>Custom Upload</>}
+                {selectedFile ? <>{selectedFile.name}</> : <>Select PDF</>}
               </label>
               <input
                 type="file"
@@ -98,10 +112,7 @@ function UserHome({ token, tokenChange }) {
         </>
       ) : (
         <>
-          <div className="user-sign-page">
-            <a href={`/signUp`}>SignUp</a>
-            <a href={`/signIn`}>Log In</a>
-          </div>
+          <HomepageComponent />
         </>
       )}
     </div>

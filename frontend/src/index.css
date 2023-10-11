@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
+  background-color: white;
 }
 ::-webkit-scrollbar {
   width: 10px;
@@ -239,7 +239,6 @@ input:focus {
 .pdf-name {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: 80px;
   margin: 0px auto;
   text-align: center;
@@ -441,7 +440,8 @@ input[type="file"] {
 }
 
 .sign-message {
-  font-size: 14px;
+  font-size: 13px;
+  color: red;
 }
 
 .search-box {
@@ -492,4 +492,196 @@ input[type="file"] {
 
 button {
   cursor: pointer;
+}
+
+/* Base */
+.loading {
+  left: 50%;
+  top: 50%;
+  font-size: 36px;
+  font-family: serif;
+  font-weight: bold;
+  letter-spacing: 4.4px;
+  text-transform: capitalize;
+  position: absolute;
+  overflow: hidden;
+  transform: translate(-50%, -60%);
+}
+.loading:before {
+  color: #aaa;
+  content: attr(data-loading-text);
+}
+
+.loading:after {
+  top: 0;
+  left: 0;
+  width: 0;
+  opacity: 1;
+  color: #444;
+  overflow: hidden;
+  position: absolute;
+  content: attr(data-loading-text);
+  animation: loading 3s infinite;
+}
+
+@keyframes loading {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.homepage img {
+  width: 40%;
+  float: right;
+  min-width: 450px;
+  mix-blend-mode: multiply;
+}
+
+.homepage {
+  background-color: white;
+  position: relative;
+  height: 100vh;
+}
+
+.homepage-btn {
+  display: flex;
+  row-gap: 20px;
+  column-gap: 20px;
+}
+.abs-img-homepage {
+  position: absolute;
+}
+
+.homepage-title {
+  z-index: 10;
+  width: 30%;
+  padding-left: 50px;
+}
+
+.homepage-title h1 {
+  font-size: 40px;
+}
+
+.homepage-title-main {
+  width: 100%;
+  z-index: 10;
+}
+
+@media screen and (max-width: 800px) {
+  .homepage {
+    background-color: lightgreen;
+    height: 100vh;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  body {
+    background-color: lightgreen;
+  }
+  .user-home h2 {
+    color: black;
+  }
+  .homepage-title {
+    z-index: 10;
+    width: 80%;
+    padding-left: 50px;
+  }
+
+  .user-home label {
+    color: gray;
+    border: 1px solid black;
+  }
+
+  .abs-img-homepage {
+    position: relative !important;
+    float: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  .homepage img {
+    width: 30% !important;
+    float: none;
+  }
+  .homepage-btn a {
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+  }
+
+  .homepage-btn a:hover {
+    color: white;
+  }
+}
+
+.hover-2 {
+  --c: rgb(80, 162, 80); /* the color */
+  --b: 0.1em; /* border length*/
+  --d: 20px; /* the cube depth */
+
+  --_s: calc(var(--d) + var(--b));
+
+  color: var(--c);
+  border: solid #0000;
+  border-width: var(--b) var(--b) var(--_s) var(--_s);
+  background: conic-gradient(
+        at left var(--d) bottom var(--d),
+        #0000 90deg,
+        rgb(255 255 255 /0.3) 0 225deg,
+        rgb(255 255 255 /0.6) 0
+      )
+      border-box,
+    conic-gradient(at left var(--_s) bottom var(--_s), #0000 90deg, var(--c) 0)
+      0 100% / calc(100% - var(--b)) calc(100% - var(--b)) border-box;
+  transform: translate(calc(var(--d) / -1), var(--d));
+  clip-path: polygon(
+    var(--d) 0%,
+    var(--d) 0%,
+    100% 0%,
+    100% calc(100% - var(--d)),
+    100% calc(100% - var(--d)),
+    var(--d) calc(100% - var(--d))
+  );
+  transition: 0.5s;
+  min-width: 300px;
+}
+.hover-2:hover {
+  transform: translate(0, 0);
+  clip-path: polygon(
+    0% var(--d),
+    var(--d) 0%,
+    100% 0%,
+    100% calc(100% - var(--d)),
+    calc(100% - var(--d)) 100%,
+    0% 100%
+  );
+}
+
+.login-form form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+}
+
+.login-form form input {
+  width: 40vw !important;
+  height: 50px;
+  max-width: 400px;
+}
+
+.signup form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+}
+
+.signup form input {
+  width: 40vw !important;
+  height: 50px;
+  max-width: 400px;
 }
